@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Navbar from './Navbar'
+import Taskboard from './Taskboard';
 import './App.css'
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
   return(
     <div className={darkMode ? 'app dark':'app light'}>
         <Navbar darkMode={darkMode} toggleTheme={toggleTheme}/>
+        <Taskboard />
     </div>
   );
 }
