@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import './Taskboard.css';
+import { obtenerTareas, crearTarea } from "./services/taskService";
 
 function Taskboard() {
     const [tareas, setTareas] = useState(() => {
@@ -16,8 +17,12 @@ function Taskboard() {
 
     // 🧠 Recuperar tareas de localStorage al cargar
     useEffect(() => {
-        localStorage.setItem('tareas', JSON.stringify(tareas));
-    }, [tareas]);
+        obtenerTareas().then(res =>{
+            setTareas(res.data);
+        }).catch(err => {
+            console.error("Error al obtener tareas", err)
+        })
+    }, []);
 
     // 💾 Guardar tareas en localStorage cuando cambian
     useEffect(() => {
@@ -31,9 +36,14 @@ function Taskboard() {
 
     const agregarTarea = () => {
         if (nuevaTarea.trim() === '') return;
-        setTareas([...tareas, { texto: nuevaTarea, completada: false }]);
-        setNuevaTarea('');
-        mostrarToast('Tarea agregada ✅');
+        const nueva = {texto: nuevaTarea, completada: false};
+        crearTarea(nueva).then(res => {
+            setTareas([...tareas, res.data]);
+            setNuevaTarea('');
+            mostrarToast('Tarea agregada ✅');
+        }).catch(err => {
+            console.error("Error al agregar tarea", err);
+        });
     };
 
     const completarTarea = (index) => {
