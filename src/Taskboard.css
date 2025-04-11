@@ -189,8 +189,49 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     animation: fadeInOut 2s ease;
-  }
-  
+}
+
+.editar-input {
+    flex: 1;
+    font-size: 1rem;
+    padding: 0.4rem 0.6rem;
+    border: 2px solid #00adb5;
+    border-radius: 6px;
+    outline: none;
+}
+
+.filtro-tareas{
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.filtro-tareas button{
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #eee;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.filtro-tareas button.activo{
+    background-color: #00adb5;
+    color: white;
+}
+
+.app.dark .filtro-tareas button{
+    background-color: #333;
+    color: white;
+}
+
+.app.dark .filtro-tareas button.activo{
+    background-color: #00adb5;
+    color: white;
+}
+
 @keyframes fadeInOut {
     0% { opacity: 0; transform: translateY(-10px); }
     10% { opacity: 1; transform: translateY(0); }

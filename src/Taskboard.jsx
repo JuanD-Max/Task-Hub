@@ -1,18 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import './Taskboard.css';
 
-
 function Taskboard() {
-    const [tareas, setTareas] = useState([]);
+    const [tareas, setTareas] = useState(() => {
+        const guardadas = localStorage.getItem('tareas');
+        return guardadas ? JSON.parse(guardadas) : [];
+    })
     const [nuevaTarea, setNuevaTarea] = useState('');
     const [eliminandoIndex, setEliminandoIndex] = useState(null);
     const [toast, setToast] = useState(null);
+    const [editandoIndex, setEditandoIndex] = useState(null);
+    const [textoEditado, setTextoEditado] = useState('');
+    const [filtro, setFiltro] = useState('todas');
+
+    // 🧠 Recuperar tareas de localStorage al cargar
+    useEffect(() => {
+        localStorage.setItem('tareas', JSON.stringify(tareas));
+    }, [tareas]);
+
+    // 💾 Guardar tareas en localStorage cuando cambian
+    useEffect(() => {
+        localStorage.setItem('tareas', JSON.stringify(tareas));
+    }, [tareas]);
 
     const mostrarToast = (mensaje) => {
         setToast(mensaje);
         setTimeout(() => setToast(null), 2000);
-    }
+    };
 
     const agregarTarea = () => {
         if (nuevaTarea.trim() === '') return;
@@ -26,7 +41,7 @@ function Taskboard() {
         tareasActualizadas[index].completada = !tareasActualizadas[index].completada;
         setTareas(tareasActualizadas);
         mostrarToast(tareasActualizadas[index].completada ? '¡Tarea completada! 🎉' : 'Desmarcada 🚫');
-    }
+    };
 
     const eliminarTarea = (index) => {
         setEliminandoIndex(index);
@@ -36,6 +51,26 @@ function Taskboard() {
             mostrarToast('Tarea eliminada 🗑️');
         }, 300);
     };
+
+    const iniciarEdicion = (index, texto) => {
+        setEditandoIndex(index);
+        setTextoEditado(texto);
+    };
+
+    const guardarEdicion = (index) => {
+        const tareasActualizadas = [...tareas];
+        tareasActualizadas[index].texto = textoEditado.trim() || tareas[index].texto;
+        setTareas(tareasActualizadas);
+        setEditandoIndex(null);
+        setTextoEditado('');
+        mostrarToast('Tarea Actualizada ✏️');
+    };
+
+    const tareasFiltradas = tareas.filter(t=>{
+        if(filtro === 'completadas') return t.completada;
+        if(filtro === 'pendientes') return !t.completada;
+        return true;
+    })
 
     return (
         <section className="task-board">
@@ -52,6 +87,11 @@ function Taskboard() {
                     />
                     <button onClick={agregarTarea}>Agregar</button>
                 </div>
+                <div className="filtro-tareas">
+                    <button onClick={()=> setFiltro('todas')} className={filtro === 'todas' ? 'activo' :''}>Todas</button>
+                    <button onClick={()=> setFiltro('pendientes')} className={filtro === 'pendientes' ? 'activo': ''}>Pendientes</button>
+                    <button onClick={()=> setFiltro('completadas')} className = {filtro === 'completadas' ? 'activo':''}>Completadas</button>
+                </div>
             </div>
 
             <AnimatePresence>
@@ -59,7 +99,7 @@ function Taskboard() {
                     {tareas.length === 0 ? (
                         <p className="sin-tareas">No tienes tareas por ahora ✨</p>
                     ) : (
-                        tareas.map((t, i) => (
+                        tareasFiltradas.map((t, i) => (
                             <motion.li
                                 key={i}
                                 className={`task-card ${t.completada ? 'completada' : ''} ${eliminandoIndex === i ? 'eliminando' : ''}`}
@@ -71,7 +111,29 @@ function Taskboard() {
                                 exit={{ opacity: 0, scale: 0.9 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <span onClick={() => completarTarea(i)}>{t.texto}</span>
+                                {editandoIndex === i ? (
+                                    <input
+                                        type="text"
+                                        className="editar-input"
+                                        value={textoEditado}
+                                        autoFocus
+                                        onChange={(e) => setTextoEditado(e.target.value)}
+                                        onBlur={() => guardarEdicion(i)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') guardarEdicion(i);
+                                        }}
+                                    />
+                                ) : (
+                                    <span
+                                        onClick={() => completarTarea(i)}
+                                        onDoubleClick={(e) => {
+                                            e.stopPropagation();
+                                            iniciarEdicion(i, t.texto);
+                                        }}
+                                    >
+                                        {t.texto}
+                                    </span>
+                                )}
                                 <button className="eliminar" onClick={() => eliminarTarea(i)}>🗑️</button>
                             </motion.li>
                         ))
