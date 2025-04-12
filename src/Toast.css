@@ -1,0 +1,24 @@
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background-color: #00adb5;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: fadeInOut 2s ease forwards;
+}
+
+.app.dark .toast{
+    background-color: #007f84;
+    color: #fff;
+}
+
+@keyframes fadeInOut {
+    0% {opacity: 0; transform: translateY(20px);}
+    10%, 90%{ opacity: 1; transform: translateY(0);}
+    100% {opacity: 0; transform: translateY(20px);}
+}

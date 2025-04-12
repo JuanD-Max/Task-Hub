@@ -114,6 +114,11 @@
     box-shadow: 0 4px 12px rgba(0, 173, 181, 0.2);
 }
 
+.app.dark .task-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 173, 181, 0.2);
+}
+
 .sin-tareas{
     color: #999;
     font-style: italic;
@@ -175,20 +180,6 @@
 .app.dark .task-card.completada {
     background-color: #2e5934;
     color: #ddd;
-}
-
-.toast {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    background-color: #00adb5;
-    color: white;
-    padding: 0.8rem 1.2rem;
-    border-radius: 12px;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    animation: fadeInOut 2s ease;
 }
 
 .editar-input {

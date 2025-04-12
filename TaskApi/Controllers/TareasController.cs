@@ -5,7 +5,7 @@ namespace Taskapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TareasController:ControllerBase
+    public class TareasController : ControllerBase
     {
         private static List<Tarea> tareas = new List<Tarea>
         {
@@ -13,13 +13,33 @@ namespace Taskapi.Controllers
             new Tarea {Id = 2, Texto = "Conectar con React", Completada = true}
         };
         [HttpGet]
-        public ActionResult<IEnumerable<Tarea>> Get()=> tareas;
+        public ActionResult<IEnumerable<Tarea>> Get() => tareas;
         [HttpPost]
         public ActionResult<Tarea> Post(Tarea nueva)
         {
             nueva.Id = tareas.Count + 1;
             tareas.Add(nueva);
             return CreatedAtAction(nameof(Get), new { id = nueva.Id }, nueva);
+        }
+        [HttpPut("{id}")]
+        public ActionResult<Tarea> Put(int id, Tarea actualizada)
+        {
+            var tarea = tareas.FirstOrDefault(t => t.Id == id);
+            if(tarea == null)
+                return NotFound();
+            
+            tarea.Texto = actualizada.Texto;
+            tarea.Completada = actualizada.Completada;
+            return Ok(tarea);
+        }
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var tarea = tareas.FirstOrDefault(t=> t.Id == id);
+            if(tarea == null)
+                return NotFound();
+            tareas.Remove(tarea);
+            return NoContent();
         }
     }
 }

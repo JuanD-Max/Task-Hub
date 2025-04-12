@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import './Taskboard.css';
-import { obtenerTareas, crearTarea } from "./services/taskService";
+import { obtenerTareas, crearTarea, actualizarTarea, eliminarTarea as eliminarApi } from "./services/taskService";
+import Toast from "./Toast";
 
 function Taskboard() {
     const [tareas, setTareas] = useState(() => {
@@ -47,18 +48,29 @@ function Taskboard() {
     };
 
     const completarTarea = (index) => {
-        const tareasActualizadas = [...tareas];
-        tareasActualizadas[index].completada = !tareasActualizadas[index].completada;
-        setTareas(tareasActualizadas);
-        mostrarToast(tareasActualizadas[index].completada ? '¡Tarea completada! 🎉' : 'Desmarcada 🚫');
+        const tareaOriginal = tareas[index];
+        const tareaActualizada = {...tareaOriginal, completada: !tareaOriginal.completada};
+
+        actualizarTarea(tareaOriginal.id, tareaActualizada)
+            .then(()=>{
+                const tareasActualizadas = [...tareas];
+                tareasActualizadas[index] = tareaActualizada;
+                setTareas(tareasActualizadas);
+                mostrarToast(tareaActualizada.completada ? 'Tarea Completada! ✅':'Desmarcada ⛔');
+            })
+            .catch(err => console.error("Error al actualizar tarea", err));
     };
 
     const eliminarTarea = (index) => {
+        const tarea = tareas[index];
         setEliminandoIndex(index);
         setTimeout(() => {
-            setTareas((prev) => prev.filter((_, i) => i !== index));
-            setEliminandoIndex(null);
-            mostrarToast('Tarea eliminada 🗑️');
+            eliminarApi(tarea.id).then(()=>{
+                setTareas(prev => prev.filter((_, i) => i !== index));
+                setEliminandoIndex(null);
+                mostrarToast('Tarea eliminada 🗑️');
+            })
+            .catch(err => console.error("Error al eliminar tarea", err));
         }, 300);
     };
 
@@ -68,12 +80,22 @@ function Taskboard() {
     };
 
     const guardarEdicion = (index) => {
-        const tareasActualizadas = [...tareas];
-        tareasActualizadas[index].texto = textoEditado.trim() || tareas[index].texto;
-        setTareas(tareasActualizadas);
-        setEditandoIndex(null);
-        setTextoEditado('');
-        mostrarToast('Tarea Actualizada ✏️');
+        const tareaOriginal = tareas[index]        ;
+        const tareaActualizada = {
+            ...tareaOriginal,
+            texto: textoEditado.trim() || tareaOriginal.texto
+        };
+
+        actualizarTarea(tareaOriginal.id, tareaActualizada)
+            .then(()=>{
+                const nuevas = [...tareas];
+                nuevas[index] = tareaActualizada;
+                setTareas(nuevas);
+                setEditandoIndex(null);
+                setTextoEditado('');
+                mostrarToast('Tarea Actualizada ✏️');
+            })
+            .catch(err => console.error("Error al editar tarea", err));
     };
 
     const tareasFiltradas = tareas.filter(t=>{
@@ -84,7 +106,7 @@ function Taskboard() {
 
     return (
         <section className="task-board">
-            {toast && <div className="toast">{toast}</div>}
+            <Toast mensaje={toast}/>
 
             <div className="task-header">
                 <h2>📝 Mis Tareas</h2>
